@@ -3,18 +3,21 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
-print("Fibonacci number")
+def chatbot():
+  while True:
+    user_input = input("You: ").lower()
+    if user_input == "hello":
+      print("Bot: Hi there!")
+    elif user_input == "bye":
+      print("Bot: Goodbye!")
+      break
+    else:
+      print("Bot: I'm sorry, I don't understand.")
 
-n = 10
 
-fibo = [0]*(n)
-fibo[0] = 0
-fibo[1] = 1
-
-for i in range(2,n):
-  fibo[i] = fibo[i-1] + fibo[i-2]
-
-print(fibo)
+if __name__ == "__main__":
+  print("Bot: Hello! I'm your chatbot.")
+  chatbot()
 
 # Press the green button in the gutter to run the script.
 
