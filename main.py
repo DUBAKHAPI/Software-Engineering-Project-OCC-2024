@@ -78,15 +78,10 @@ user_input_entry.pack(expand=True, fill='x')  # Expand horizontally
 
 
 ##Other buttons for more general information
-general_facts_button = Button(root, text="General Facts")
-general_facts_button.pack()
-
 business_contact_button = Button(root, text="Business Contact")
 business_contact_button.pack()
 tracking_information_button = Button(root, text="Track Order")
 tracking_information_button.pack()
-
-
 
 
 
