@@ -4,8 +4,13 @@
 
 import tkinter as tk
 from tkinter import Button, Entry, Label, messagebox, Toplevel
-
+import openai
 import sqlite3
+
+#Set your OpenAI API key
+openai.api_key = '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'
+#REST OF CODE
+
 
 conn = sqlite3.connect('user_database.db')
 cursor = conn.cursor()
@@ -17,12 +22,9 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS Users (
                   )''')
 conn.commit()
 
-root = tk.Tk()
-root.title("chatbot GUI")
 
-window_width = root.winfo_screenwidth() // 5
-window_height = root.winfo_screenheight() // 2
-root.geometry(f"{window_width}x{window_height}")
+
+
 
 
 def on_click(event):
@@ -32,8 +34,62 @@ def on_click(event):
 
 def start_chatbot():
     print("Welcome! The Chatbot is ready for your questions")
+def send_to_openai(prompt):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",  # Replace model to 'gpt-3.5-turbo'
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a helpful assistant."
+            },
+            {
+                "role": "user",
+                "content": f"{prompt}"
+            }
+        ],
+        max_tokens=100
+
+    )
+    return response['choices'][0]['message']['content'].strip()
 
 
+def process_user_input():  ##adding event=none
+    user_input = user_input_entry.get()
+    user_input_entry.delete(0, tk.END)
+
+    # Send user input to OpenAI for generating a response
+    response = send_to_openai(user_input)
+
+    # Display the response in the chat window
+    chat_display.config(state=tk.NORMAL)
+    chat_display.insert(tk.END, f"User: {user_input}\n")
+    chat_display.insert(tk.END, f"Chatbot: {response}\n\n")
+    chat_display.config(state=tk.DISABLED)
+    chat_display.yview(tk.END)
+
+#CREATE ROOT WINDOW
+root = tk.Tk()
+root.title("chatbot GUI")
+#size and color
+window_width = root.winfo_screenwidth() // 5
+window_height = root.winfo_screenheight() // 2
+root.geometry(f"{window_width}x{window_height}")
+
+###BINDING THE ENTER KEY TO THE USER_INPUT_ENTRY WIDGET
+user_input_entry = Entry(root, width=50, state="disabled")
+user_input_entry.insert(0, "Please ask any questions regarding your problems")
+user_input_entry.bind("<FocusIn>", on_click)
+user_input_entry.pack(expand=True, fill='x')
+
+#BIND THE ENTER KEY TO THE USER_INPUT_ENTRY WIDGET
+user_input_entry.bind("<Return>", process_user_input)
+
+# Chat entry and buttons initially disabled
+business_contact_button = Button(root, text="Business Contact", command=lambda: display_contact_info(),
+                                 state="disabled")
+
+
+###DEFINING LOGIN
 def open_login_page():
     login_window = Toplevel(root)
     login_window.title("Login")
@@ -141,10 +197,13 @@ user_input_entry.insert(0, "Please ask any questions regarding your problems")
 user_input_entry.bind("<FocusIn>", on_click)
 user_input_entry.pack(expand=True, fill='x')
 
+# Create button to send user input
+send_button = Button(root, text="Enter", command=process_user_input)
+send_button.pack()
+
 business_contact_button = Button(root, text="Business Contact", command=lambda: display_contact_info(),
                                  state="disabled")
 business_contact_button.pack()
-
 tracking_information_button = Button(root, text="Track Order", state="disabled")
 tracking_information_button.pack()
 
@@ -166,5 +225,24 @@ sign_up_button.pack()
 
 guest_button = Button(root, text="Guest", command=guest_login)
 guest_button.pack()
+
+##AI INTEGRATION
+# Enable chat entry and buttons
+user_input_entry.config(state="normal")
+business_contact_button.config(state="normal")
+tracking_information_button.config(state="normal")
+
+
+# Create chat display area
+chat_display = tk.Text(root, wrap=tk.WORD, state=tk.DISABLED)
+chat_display.pack(expand=True, fill='both')
+
+
+# Create button to send user input
+send_button = Button(root, text="Send",)
+send_button.pack()
+# Create button to send user input
+send_button.pack()
+
 
 root.mainloop()
