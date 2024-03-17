@@ -9,9 +9,9 @@ import sqlite3
 
 #Set your OpenAI API key
 openai.api_key = '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'
-#REST OF CODE
 
 
+###CONNECTION TO A DATABASE, WILL MAY NEED TO SWITCH TO SQL OR MySQL
 conn = sqlite3.connect('user_database.db')
 cursor = conn.cursor()
 
@@ -23,7 +23,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS Users (
 conn.commit()
 
 
-
+##Start of rest of code
 
 
 
@@ -60,9 +60,8 @@ def process_user_input():  ##adding event=none
     # Send user input to OpenAI for generating a response
     response = send_to_openai(user_input)
 
-    # Display the response in the chat window
+    # Display only the chatbot response in the chat window
     chat_display.config(state=tk.NORMAL)
-    chat_display.insert(tk.END, f"User: {user_input}\n")
     chat_display.insert(tk.END, f"Chatbot: {response}\n\n")
     chat_display.config(state=tk.DISABLED)
     chat_display.yview(tk.END)
