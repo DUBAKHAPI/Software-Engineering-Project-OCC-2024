@@ -1,0 +1,31 @@
+#Rasha Login Page
+import tkinter as tk
+from tkinter import font
+
+def login():
+    print("Login button clicked")
+
+def sign_up():
+    print("Sign Up button clicked")
+
+# Create main window
+root = tk.Tk()
+root.title("Chatter Bot Support")
+root.geometry("1200x800")
+
+# Set light green background
+root.configure(bg="grey")
+
+# Create label for welcome message
+welcome_label = tk.Label(root, text="Welcome to Chatter Bot Support", font=("Helvetica", 24, "bold"), bg="grey")
+welcome_label.place(relx=0.5, rely=0.3, anchor="center")
+
+# Create login button
+login_button = tk.Button(root, text="Login", font=("Helvetica", 16, "bold"), command=login, width=20)
+login_button.place(relx=0.35, rely=0.5, anchor="center")
+
+# Create sign up button
+signup_button = tk.Button(root, text="Sign Up", font=("Helvetica", 16, "bold"), command=sign_up, width=20)
+signup_button.place(relx=0.65, rely=0.5, anchor="center")
+
+root.mainloop()
