@@ -3,7 +3,7 @@
 
 
 import tkinter as tk
-from tkinter import Button, Entry, Label, messagebox, Toplevel
+from tkinter import Button, Entry, Label, messagebox, Toplevel, Frame, CENTER
 import openai
 import sqlite3
 
@@ -118,43 +118,58 @@ def open_login_page():
 def open_sign_up_page():
     sign_up_window = Toplevel(root)
     sign_up_window.title("Sign Up")
+    sign_up_window.geometry("1200x800")
 
-    email_label = Label(sign_up_window, text="Email:")
-    email_label.grid(row=0, column=0, padx=10, pady=5)
-    email_entry = Entry(sign_up_window)
-    email_entry.grid(row=0, column=1, padx=10, pady=5)
+    # Create a frame to contain the form, which can be centered
+    form_frame = Frame(sign_up_window)
+    form_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
-    password_label = Label(sign_up_window, text="Password:")
-    password_label.grid(row=1, column=0, padx=10, pady=5)
-    password_entry = Entry(sign_up_window, show="*")
-    password_entry.grid(row=1, column=1, padx=10, pady=5)
+    # First name entry
+    first_name_label = Label(form_frame, text="First Name:")
+    first_name_label.grid(row=0, column=0, padx=10, pady=5)
+    first_name_entry = Entry(form_frame)
+    first_name_entry.grid(row=0, column=1, padx=10, pady=5)
 
-    reenter_password_label = Label(sign_up_window, text="Re-enter Password:")
-    reenter_password_label.grid(row=2, column=0, padx=10, pady=5)
-    reenter_password_entry = Entry(sign_up_window, show="*")
-    reenter_password_entry.grid(row=2, column=1, padx=10, pady=5)
+    # Last name entry
+    last_name_label = Label(form_frame, text="Last Name:")
+    last_name_label.grid(row=1, column=0, padx=10, pady=5)
+    last_name_entry = Entry(form_frame)
+    last_name_entry.grid(row=1, column=1, padx=10, pady=5)
 
-    sign_up_button = Button(sign_up_window, text="Sign Up",
+    # Email entry
+    email_label = Label(form_frame, text="Email:")
+    email_label.grid(row=2, column=0, padx=10, pady=5)
+    email_entry = Entry(form_frame)
+    email_entry.grid(row=2, column=1, padx=10, pady=5)
+
+    # Password entry
+    password_label = Label(form_frame, text="Password:")
+    password_label.grid(row=3, column=0, padx=10, pady=5)
+    password_entry = Entry(form_frame, show="*")
+    password_entry.grid(row=3, column=1, padx=10, pady=5)
+
+    # Re-enter Password entry
+    reenter_password_label = Label(form_frame, text="Re-enter Password:")
+    reenter_password_label.grid(row=4, column=0, padx=10, pady=5)
+    reenter_password_entry = Entry(form_frame, show="*")
+    reenter_password_entry.grid(row=4, column=1, padx=10, pady=5)
+
+    # Sign Up button
+    sign_up_button = Button(form_frame, text="Sign Up",
                             command=lambda: sign_up(email_entry.get(), password_entry.get(),
                                                     reenter_password_entry.get()))
-    sign_up_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+    sign_up_button.grid(row=5, column=1, padx=10, pady=10, sticky="e")
 
-    back_button = Button(sign_up_window, text="Back", command=sign_up_window.destroy)
-    back_button.grid(row=0, column=2, padx=10, pady=5, sticky="w")
+    # Back button
+    back_button = Button(form_frame, text="Back", command=sign_up_window.destroy)
+    back_button.grid(row=5, column=0, padx=10, pady=5, sticky="w")
+
 
     # Enable chat entry and buttons when signed up
     user_input_entry.config(state="normal")
     business_contact_button.config(state="normal")
     tracking_information_button.config(state="normal")
 
-
-def guest_login():
-    print("Guest login")
-
-    # Enable chat entry and buttons for guest login
-    user_input_entry.config(state="normal")
-    business_contact_button.config(state="normal")
-    tracking_information_button.config(state="normal")
 
 
 def sign_up(email, password, confirm_password):
@@ -222,8 +237,6 @@ login_button.pack()
 sign_up_button = Button(root, text="Sign Up", command=open_sign_up_page)
 sign_up_button.pack()
 
-guest_button = Button(root, text="Guest", command=guest_login)
-guest_button.pack()
 
 ##AI INTEGRATION
 # Enable chat entry and buttons
