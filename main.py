@@ -34,7 +34,6 @@ conn.commit()
 ##Start of rest of code
 
 
-
 def on_click(event):
     if user_input_entry.get() == "Please ask any questions":
         user_input_entry.delete(0, tk.END)
