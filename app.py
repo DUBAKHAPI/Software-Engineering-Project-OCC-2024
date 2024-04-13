@@ -21,9 +21,21 @@ def Login():
     chatAreaPage.pack()  # Shows chat area
 
 
+def toChatAreaPage():
+    supportTicketPage.pack_forget()  # hides the submit ticket page
+    chatAreaPage.pack()  # shows the chat area page
+
+
 def toResetPassword():
-    loginPage.pack_forget()  # Hide the main menu page
+    loginPage.pack_forget()  # Hide the login page
+    mainMenuPage.pack_forget()  # Hide the main menu page
     resetPasswordPage.pack()  # Show the Reset Password Page
+    resetResetPasswordPage()  # Reset the reset password page
+
+
+def resetResetPasswordPage():
+    resetPage_username_entry.delete(0, tk.END)  # Clear the entry field
+    resetPage_result_label.config(text="", fg="grey")  # Hide the red text
 
 
 def ResetPassword():
@@ -39,8 +51,11 @@ def ResetPassword():
 def toMainMenu():
     loginPage.pack_forget()  # Hide the login page
     signUpPage.pack_forget()  # Hide the Sign-Up page
-    resetPasswordPage.pack_forget()  # Hide the Sign-Up page
+    resetPasswordPage.pack_forget()  # Hide the reset password page
     mainMenuPage.pack()  # Show the main menu page
+    resetPage_mainMenu_button.grid_forget()  # Hide Main Menu button on the reset password page
+    resetPage_reset_button.grid(row=3, column=0,
+                                columnspan=2, pady=20)  # Show Reset Password button on the reset password page
 
 
 def on_click_typing(event):
@@ -52,12 +67,14 @@ def on_click_typing(event):
 
 
 def toRequestAgentSupport():
-    print("Reset Password Button Clicked")
+    chatAreaPage.pack_forget()  # hides chat session
+    supportTicketPage.pack()  # shows ticket page
 
 
 def EndSession():
     print("remember add Sign Out portion command")
     chatAreaPage.pack_forget()  # Hide the chat area page
+    supportTicketPage.pack_forget()  # Hide the support ticket page
     mainMenuPage.pack()  # Show the Main Menu
 
 
@@ -72,6 +89,7 @@ loginPage = tk.Frame(win, bg="grey")
 signUpPage = tk.Frame(win, bg="grey")
 resetPasswordPage = tk.Frame(win, bg="grey")
 chatAreaPage = tk.Frame(win, bg="grey")
+supportTicketPage = tk.Frame(win, bg="grey")
 
 # ------------Main Menu----------------
 # Create labels for Main Menu
@@ -244,8 +262,9 @@ chatAreaPage_button_frame = tk.Frame(chatAreaPage, bg='grey')
 chatAreaPage_button_frame.grid(row=1, column=0, columnspan=2, pady=10)
 
 # Create the "Request Live Agent Support" button
-chatAreaPage_request_button = tk.Button(chatAreaPage_button_frame, text="Request Agent Support", state=tk.DISABLED,
-                                        fg="black", font=("Helvetica", 12, "bold"), bd=2, relief=tk.RAISED)
+chatAreaPage_request_button = tk.Button(chatAreaPage_button_frame, text="Request Agent Support",
+                                        command=toRequestAgentSupport, fg="black", font=("Helvetica", 12, "bold"), bd=2,
+                                        relief=tk.RAISED)
 chatAreaPage_request_button.pack(side=tk.LEFT, padx=(10, 5))
 
 # Create the "End Session" button
@@ -254,6 +273,40 @@ chatAreaPage_end_button = tk.Button(chatAreaPage_button_frame, text="End Session
 chatAreaPage_end_button.pack(side=tk.RIGHT, padx=(5, 10))
 # ------------Chat Area Page End----------------
 
+
+# ------------Support Ticket Page----------------
+# Create label for "issue"
+supportTicket_issue_label = tk.Label(supportTicketPage, text="ISSUE:", font=("Helvetica", 12, "bold"), bg="grey")
+supportTicket_issue_label.grid(row=0, column=0, sticky="w", padx=20, pady=10)
+
+# Create text box for input
+supportTicket_issue_text = tk.Text(supportTicketPage, height=1, width=50)
+supportTicket_issue_text.grid(row=0, column=1, sticky="w", padx=10, pady=10)
+
+# Create label for "description"
+supportTicket_description_label = tk.Label(supportTicketPage, text="DESCRIPTION:", font=("Helvetica", 12, "bold"),
+                                           bg="grey")
+supportTicket_description_label.grid(row=1, column=0, sticky="w", padx=20, pady=10)
+
+# Create text box for description
+supportTicket_description_text = tk.Text(supportTicketPage, height=40, width=100)
+supportTicket_description_text.grid(row=1, column=1, columnspan=2, sticky="w", padx=5, pady=5)
+
+# Create "Return to Chat Session" button
+supportTicket_return_button = tk.Button(supportTicketPage, text="Return to Chat Session",
+                                        font=("Helvetica", 12, "bold"), bd=2, relief=tk.RAISED, command=toChatAreaPage)
+supportTicket_return_button.grid(row=2, column=1, pady=10, padx=10, sticky='ew')
+
+# Create "Main Menu" button
+supportTicket_main_menu_button = tk.Button(supportTicketPage, text="End Session",
+                                           font=("Helvetica", 12, "bold"), bd=2, relief=tk.RAISED, command=EndSession)
+supportTicket_main_menu_button.grid(row=2, column=2, pady=10, padx=10, sticky='ew')
+
+# Create "Submit Ticket" button
+supportTicket_submit_button = tk.Button(supportTicketPage, text="Submit Ticket",
+                                        font=("Helvetica", 12, "bold"), bd=2, relief=tk.RAISED)
+supportTicket_submit_button.grid(row=3, column=1, columnspan=2, pady=10, padx=10, sticky='ew')
+# ------------Support Ticket Page End----------------
 
 mainMenuPage.tkraise()
 win.mainloop()
