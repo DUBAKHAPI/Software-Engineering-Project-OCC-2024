@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import *
+import mysql.connector
 
 
+# ------------App Functions----------------
 def toPageLogin():
     mainMenuPage.pack_forget()  # Hide the main menu page
     loginPage.pack()  # Show the login page
@@ -76,7 +78,43 @@ def EndSession():
     chatAreaPage.pack_forget()  # Hide the chat area page
     supportTicketPage.pack_forget()  # Hide the support ticket page
     mainMenuPage.pack()  # Show the Main Menu
+# ------------App Functions end----------------
 
+
+# ------------Database Functions----------------
+def PassMessageLog():
+    print("hello")
+
+
+def PassUnknownTextLog():
+    print("hello")
+
+
+def SubmitTicket():
+    print("hello")
+
+
+def VerifyLogIn():
+    print("hello")
+
+
+def GetFaqURl():
+    print("hello")
+
+
+def AddUser():
+    print("hello")
+
+
+def ResetPassword():
+    print("hello")
+# ------------Database Functions End----------------
+
+
+# ------------AI Functions----------------
+
+
+# ------------AI Functions End----------------
 
 win = tk.Tk()
 win.geometry("1200x800")
@@ -307,6 +345,13 @@ supportTicket_submit_button = tk.Button(supportTicketPage, text="Submit Ticket",
                                         font=("Helvetica", 12, "bold"), bd=2, relief=tk.RAISED)
 supportTicket_submit_button.grid(row=3, column=1, columnspan=2, pady=10, padx=10, sticky='ew')
 # ------------Support Ticket Page End----------------
+
+
+# ------------Database Implementation----------------
+aiDB = mysql.connector.connect(host="localhost", user="root",passwd="root")
+
+# ------------Database Implementation End----------------
+
 
 mainMenuPage.tkraise()
 win.mainloop()
