@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import *
-import mysql.connector
+import pymysql
+import pymysql.cursors
 
 
 # ------------App Functions----------------
@@ -82,6 +83,25 @@ def EndSession():
 
 
 # ------------Database Functions----------------
+def signup():
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="Ja12261226!",
+        database="chatterbot",
+    )
+    myCursor = con.cursor()
+    firstname = signUpPage_first_name_entry.get()
+    lastname = signUpPage_last_name_entry.get()
+    email = signUpPage_email_entry.get()
+    password = signUpPage_password_entry.get()
+    username = email.split("@")[0]
+    signInQuery = 'INSERT INTO users (username, first_name, last_name, email, password) VALUES (%s, %s, %s, %s, %s)'
+    myCursor.execute(signInQuery, (username, firstname, lastname, email, password))
+    con.commit()
+    con.close()
+
+
 def PassMessageLog():
     print("hello")
 
@@ -215,17 +235,12 @@ signUpPage_email_entry.grid(row=3, column=1, padx=10, pady=5)
 # Password entry
 signUpPage_password_label = tk.Label(signUpPage_form_frame, text="Password:", bg="grey")
 signUpPage_password_label.grid(row=4, column=0, padx=10, pady=5)
-signUpPage_password_entry = tk.Entry(signUpPage_form_frame, show="*")
+signUpPage_password_entry = tk.Entry(signUpPage_form_frame)
 signUpPage_password_entry.grid(row=4, column=1, padx=10, pady=5)
 
-# Re-enter Password entry
-signUpPage_reenter_password_label = tk.Label(signUpPage_form_frame, text="Re-enter Password:", bg="grey")
-signUpPage_reenter_password_label.grid(row=5, column=0, padx=10, pady=5)
-signUpPage_reenter_password_entry = tk.Entry(signUpPage_form_frame, show="*")
-signUpPage_reenter_password_entry.grid(row=5, column=1, padx=10, pady=5)
-
 # Sign Up button
-signUpPage_sign_up_button = tk.Button(signUpPage_form_frame, text="Sign Up", font=("Helvetica", 12, "bold"))
+signUpPage_sign_up_button = tk.Button(signUpPage_form_frame, text="Sign Up", font=("Helvetica", 12, "bold"),
+                                      command=signup)
 signUpPage_sign_up_button.grid(row=6, column=1, padx=10, pady=10, sticky="e")
 
 # Back button
@@ -348,10 +363,10 @@ supportTicket_submit_button.grid(row=3, column=1, columnspan=2, pady=10, padx=10
 
 
 # ------------Database Implementation----------------
-aiDB = mysql.connector.connect(host="localhost", user="root", passwd="root")
 
 # ------------Database Implementation End----------------
 
 
 mainMenuPage.tkraise()
 win.mainloop()
+
