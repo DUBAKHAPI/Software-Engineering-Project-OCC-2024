@@ -10,6 +10,14 @@ import sqlite3
 #Set your OpenAI API key
 openai.api_key = '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'
 
+messages = []
+
+#Setting the parameters in which the ai will respond
+system_content = '''You are a customer service chat bot that is know as HelpBot.
+You will respond only to greetings and any questions pertaining to information
+held within the database such as chatsession, faq, message, user, supportagent, supportbot
+and supportticket. For any questions that do not fall within these parameters you will
+respond with "Unfortunately I cannot help with that would you like to start a support ticket.".'''
 
 ###CONNECTION TO A DATABASE, WILL MAY NEED TO SWITCH TO SQL OR MySQL
 conn = sqlite3.connect('user_database.db')
@@ -33,14 +41,14 @@ def on_click(event):
 
 
 def start_chatbot():
-    print("Welcome! The Chatbot is ready for your questions")
+    print("Welcome! HelpBot is ready for your questions")
 def send_to_openai(prompt):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  # Replace model to 'gpt-3.5-turbo'
         messages=[
             {
                 "role": "system",
-                "content": "You are a helpful assistant."
+                "content": "You are a customer service chat bot that is know as HelpBot."
             },
             {
                 "role": "user",

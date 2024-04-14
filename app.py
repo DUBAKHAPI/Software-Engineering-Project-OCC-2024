@@ -1,10 +1,24 @@
 import tkinter as tk
 from tkinter import *
+import openai
 from tkinter import messagebox
 import pymysql
 import pymysql.cursors
 import datetime
 users_name = ""
+
+#Set your OpenAI API key
+openai.api_key = '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'
+
+
+messages = []
+
+#Setting the parameters in which the ai will respond
+system_content = '''You are a customer service chat bot that is know as HelpBot.
+You will respond only to greetings and any questions pertaining to customer services the system offers. 
+For any questions that do not fall within these parameters you will respond with "Unfortunately I cannot help with that 
+would you like to start a support ticket.".'''
+
 # ------------App Functions----------------
 
 
