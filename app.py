@@ -1,10 +1,13 @@
 import tkinter as tk
 from tkinter import *
+from tkinter import messagebox
 import pymysql
 import pymysql.cursors
-
-
+import datetime
+users_name = ""
 # ------------App Functions----------------
+
+
 def toPageLogin():
     mainMenuPage.pack_forget()  # Hide the main menu page
     loginPage.pack()  # Show the login page
@@ -18,12 +21,6 @@ def toPageSignUp():
     signUpPage.pack()  # Show the signup page
 
 
-def Login():
-    print("Login button Clicked")
-    loginPage.pack_forget()  # hides the login page
-    chatAreaPage.pack()  # Shows chat area
-
-
 def toChatAreaPage():
     supportTicketPage.pack_forget()  # hides the submit ticket page
     chatAreaPage.pack()  # shows the chat area page
@@ -33,22 +30,21 @@ def toResetPassword():
     loginPage.pack_forget()  # Hide the login page
     mainMenuPage.pack_forget()  # Hide the main menu page
     resetPasswordPage.pack()  # Show the Reset Password Page
-    resetResetPasswordPage()  # Reset the reset password page
-
-
-def resetResetPasswordPage():
-    resetPage_username_entry.delete(0, tk.END)  # Clear the entry field
-    resetPage_result_label.config(text="", fg="grey")  # Hide the red text
 
 
 def ResetPassword():
-    print("Reset Password button clicked")
-    resetPage_result_label.config(
-        text="An email has been sent if the account exists. Please check your email and follow the instructions.",
-        fg="red")
-    resetPage_result_label.grid(row=4, column=0, columnspan=2, pady=10)
+    # Display an information message indicating that an email has been sent
+    messagebox.showinfo("Email Sent", "An Email has been to your email with instructions on how to proceed")
+
+    # Hide the reset button and show the main menu button
     resetPage_reset_button.grid_forget()
     resetPage_mainMenu_button.grid(row=5, column=0, columnspan=2, pady=10)
+
+    # Show the main menu page and hide the reset password page
+    mainMenuPage.pack()
+    resetPasswordPage.pack_forget()
+
+    resetPage_username_entry.delete(0, tk.END)  # Clear the username entry field
 
 
 def toMainMenu():
@@ -63,10 +59,9 @@ def toMainMenu():
 
 def on_click_typing(event):
     """Function to handle click event on the typing area"""
-    # If the default text is present, delete it
-    if chatAreaPage_typing_area.get("1.0", "end-1c") == "Type your message here":
-        chatAreaPage_typing_area.delete("1.0", tk.END)
-        chatAreaPage_typing_area.config(fg="black")
+    if chatAreaPage_typing_area.get("1.0", "end-1c") == "Type your message here": # Check if the default text is present
+        chatAreaPage_typing_area.delete("1.0", tk.END) # If present, delete the default text
+        chatAreaPage_typing_area.config(fg="black")  # Change text color to black (assumed to be default)
 
 
 def toRequestAgentSupport():
@@ -75,31 +70,107 @@ def toRequestAgentSupport():
 
 
 def EndSession():
-    print("remember add Sign Out portion command")
+    # Clear the chat area display
+    chatAreaPage_chat_area.delete("1.0", tk.END)
+
     chatAreaPage.pack_forget()  # Hide the chat area page
     supportTicketPage.pack_forget()  # Hide the support ticket page
     mainMenuPage.pack()  # Show the Main Menu
+
+
 # ------------App Functions end----------------
 
 
 # ------------Database Functions----------------
 def signup():
+    # Create a connection to the database
     con = pymysql.connect(
         host="localhost",
         user="root",
-        password="Ja12261226!",
+        password="paulsucks01!",
         database="chatterbot",
     )
+    # Create a cursor object to execute SQL queries
     myCursor = con.cursor()
+
+    # Retrieve user input from entry fields
     firstname = signUpPage_first_name_entry.get()
     lastname = signUpPage_last_name_entry.get()
     email = signUpPage_email_entry.get()
     password = signUpPage_password_entry.get()
+
+    # Generate a username from the email address
     username = email.split("@")[0]
-    signInQuery = 'INSERT INTO users (username, first_name, last_name, email, password) VALUES (%s, %s, %s, %s, %s)'
-    myCursor.execute(signInQuery, (username, firstname, lastname, email, password))
-    con.commit()
-    con.close()
+
+    # Check if the email already exists in the database
+    DuplicateSignUpQuery = 'select * from users where email = %s'
+    myCursor.execute(DuplicateSignUpQuery, email)
+    row = myCursor.fetchone()
+
+    if row != None:
+        # If the email already exists, show a messagebox indicating duplicate email
+        messagebox.showinfo("Duplicate", "Duplicate Email")
+    else:
+        # If the email is unique, insert the user data into the database
+        messagebox.showinfo("Sign Up Successful", "Sign Up was succesful")
+        signInQuery = 'INSERT INTO users (username, first_name, last_name, email, password) VALUES (%s, %s, %s, %s, %s)'
+        myCursor.execute(signInQuery, (username, firstname, lastname, email, password))
+        con.commit()
+        con.close()
+
+        # Hide the signup page and show the login page
+        loginPage.pack()
+        signUpPage.pack_forget()
+
+        # Clear the entry fields
+        signUpPage_first_name_entry.delete(0, tk.END)
+        signUpPage_last_name_entry.delete(0, tk.END)
+        signUpPage_email_entry.delete(0, tk.END)
+        signUpPage_password_entry.delete(0, tk.END)
+
+
+def Login():
+    # Create a connection to the database
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="paulsucks01!",
+        database="chatterbot",
+    )
+    # Create a cursor object to execute SQL queries
+    myCursor = con.cursor()
+
+    # Retrieve username/email and password from entry fields
+    username_email = loginPage_username_entry.get()
+    password = loginPage_password_entry.get()
+
+    # Query to check if the provided username/email and password match a record in the database
+    logInQuery = 'select * from users where (username = %s or email = %s) and password = %s'
+    myCursor.execute(logInQuery, (username_email, username_email, password))
+    row = myCursor.fetchone()
+
+    # Check if a row was returned, indicating successful login
+    if row == None:
+        # If no row was returned, show a messagebox indicating invalid credentials
+        messagebox.showinfo("Invalid", "Invalid Username/Email or Password")
+    else:
+        # If a row was returned, hide the login page and show the chat area
+        loginPage.pack_forget()
+        chatAreaPage.pack()
+
+        # Clear the entry fields
+        loginPage_username_entry.delete(0, tk.END)
+        loginPage_password_entry.delete(0, tk.END)
+        getUserQuery = 'select * from users where (username = %s or email = %s) and password = %s'
+        myCursor.execute(getUserQuery, (username_email, username_email, password))
+        row = myCursor.fetchone()
+        getUsersName(row[2])
+        con.close()
+
+
+def getUsersName(firstname):
+    global users_name
+    users_name = firstname
 
 
 def PassMessageLog():
@@ -126,8 +197,35 @@ def AddUser():
     print("hello")
 
 
-def ResetPassword():
+def ResetPasswordEmail():
     print("hello")
+
+
+def sendMessage():
+    global users_name
+    # Get the message from the typing area
+    message = chatAreaPage_typing_area.get("1.0", tk.END).strip()
+
+    if message:
+        # Format the message as "user: message"
+        formatted_message = f"{users_name}: {message}"
+
+        # Append the formatted message to the message display portion
+        chatAreaPage_chat_area.insert(tk.END, formatted_message + "\n")
+
+        # Scroll to the end of the chat area to show the latest message
+        chatAreaPage_chat_area.see(tk.END)
+
+        # Write the formatted message along with the current date and time to the message log file
+        with open("messagelog.txt", "a") as log_file:
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            log_file.write(f"{timestamp}: {formatted_message}\n")
+
+        # Clear the typing area after sending the message
+        chatAreaPage_typing_area.delete("1.0", tk.END)
+    else:
+        # Show a messagebox if the user tries to send an empty message
+        messagebox.showinfo("Empty Message", "Please enter a message before sending.")
 # ------------Database Functions End----------------
 
 
@@ -136,6 +234,8 @@ def ResetPassword():
 
 # ------------AI Functions End----------------
 
+
+# ------------Creates Initial Window and Frames----------------
 win = tk.Tk()
 win.geometry("1200x800")
 win.title("Chatterbot Support")
@@ -148,6 +248,8 @@ signUpPage = tk.Frame(win, bg="grey")
 resetPasswordPage = tk.Frame(win, bg="grey")
 chatAreaPage = tk.Frame(win, bg="grey")
 supportTicketPage = tk.Frame(win, bg="grey")
+# ------------Initial Window and Frames End----------------
+
 
 # ------------Main Menu----------------
 # Create labels for Main Menu
@@ -180,7 +282,7 @@ loginPage_welcome_label.grid(row=0, column=0, columnspan=2, pady=20)
 loginPage_login_label = tk.Label(loginPage, text="Login", font=("Helvetica", 16, "bold"), bg="grey")
 loginPage_login_label.grid(row=1, column=0, columnspan=2, pady=10)
 
-loginPage_username_label = tk.Label(loginPage, text="Username:", font=("Helvetica", 12), bg="grey")
+loginPage_username_label = tk.Label(loginPage, text="Username or Email:", font=("Helvetica", 12), bg="grey")
 loginPage_username_label.grid(row=2, column=0, sticky="e", padx=20, pady=10)
 
 loginPage_username_entry = tk.Entry(loginPage, font=("Helvetica", 12))
@@ -217,26 +319,26 @@ signUpPage_form_frame.grid(row=1, column=0, columnspan=2)
 # First name entry
 signUpPage_first_name_label = tk.Label(signUpPage_form_frame, text="First Name:", bg="grey")
 signUpPage_first_name_label.grid(row=1, column=0, padx=10, pady=5)
-signUpPage_first_name_entry = tk.Entry(signUpPage_form_frame)
-signUpPage_first_name_entry.grid(row=1, column=1, padx=10, pady=5)
+signUpPage_first_name_entry = tk.Entry(signUpPage_form_frame, width=30)
+signUpPage_first_name_entry.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
 
 # Last name entry
 signUpPage_last_name_label = tk.Label(signUpPage_form_frame, text="Last Name:", bg="grey")
 signUpPage_last_name_label.grid(row=2, column=0, padx=10, pady=5)
-signUpPage_last_name_entry = tk.Entry(signUpPage_form_frame)
-signUpPage_last_name_entry.grid(row=2, column=1, padx=10, pady=5)
+signUpPage_last_name_entry = tk.Entry(signUpPage_form_frame, width=30)
+signUpPage_last_name_entry.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
 
 # Email entry
 signUpPage_email_label = tk.Label(signUpPage_form_frame, text="Email:", bg="grey")
 signUpPage_email_label.grid(row=3, column=0, padx=10, pady=5)
-signUpPage_email_entry = tk.Entry(signUpPage_form_frame)
-signUpPage_email_entry.grid(row=3, column=1, padx=10, pady=5)
+signUpPage_email_entry = tk.Entry(signUpPage_form_frame, width=30)
+signUpPage_email_entry.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
 
 # Password entry
 signUpPage_password_label = tk.Label(signUpPage_form_frame, text="Password:", bg="grey")
 signUpPage_password_label.grid(row=4, column=0, padx=10, pady=5)
-signUpPage_password_entry = tk.Entry(signUpPage_form_frame)
-signUpPage_password_entry.grid(row=4, column=1, padx=10, pady=5)
+signUpPage_password_entry = tk.Entry(signUpPage_form_frame, width=30)
+signUpPage_password_entry.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
 
 # Sign Up button
 signUpPage_sign_up_button = tk.Button(signUpPage_form_frame, text="Sign Up", font=("Helvetica", 12, "bold"),
@@ -292,7 +394,7 @@ chatAreaPage_chat_frame = tk.Frame(chatAreaPage, bg="white", width=800, height=8
 chatAreaPage_chat_frame.grid(row=0, column=0, columnspan=2, padx=20, pady=20)
 
 # Create a scrollable text widget for displaying messages
-chatAreaPage_chat_area = tk.Text(chatAreaPage_chat_frame, bg="white", bd=0, wrap=tk.WORD, fg="grey", height=24)
+chatAreaPage_chat_area = tk.Text(chatAreaPage_chat_frame, bg="white", bd=0, wrap=tk.WORD, fg="black", height=24)
 chatAreaPage_chat_area.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=200, pady=(50, 0))
 
 # Create a frame for typing area
@@ -301,13 +403,13 @@ chatAreaPage_typing_frame.pack(side=tk.BOTTOM, fill=tk.X)
 
 # Create a typing area for user input
 chatAreaPage_typing_area = tk.Text(chatAreaPage_typing_frame, bg="white", bd=0, wrap=tk.WORD, height=4, fg="grey")
-chatAreaPage_typing_area.insert(tk.END, "Type your message here")
+chatAreaPage_typing_area.insert(tk.END, "Type your message here")  # Placeholder text
 chatAreaPage_typing_area.bind("<Button-1>", on_click_typing)  # Bind click event to typing_area
 chatAreaPage_typing_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(10, 0), pady=(10, 0))
 
 # Create a send button
 chatAreaPage_send_button = tk.Button(chatAreaPage_typing_frame, text="Send", fg="black", font=("Helvetica", 12, "bold"),
-                                     bd=2, relief=tk.RAISED)
+                                     bd=2, relief=tk.RAISED, command=sendMessage)
 chatAreaPage_send_button.pack(side=tk.RIGHT, padx=(0, 10), pady=(10, 0))
 
 # Create a frame for buttons
@@ -366,7 +468,5 @@ supportTicket_submit_button.grid(row=3, column=1, columnspan=2, pady=10, padx=10
 
 # ------------Database Implementation End----------------
 
-
 mainMenuPage.tkraise()
 win.mainloop()
-
