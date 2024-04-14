@@ -348,7 +348,7 @@ supportTicket_submit_button.grid(row=3, column=1, columnspan=2, pady=10, padx=10
 
 
 # ------------Database Implementation----------------
-aiDB = mysql.connector.connect(host="localhost", user="root",passwd="root")
+aiDB = mysql.connector.connect(host="localhost", user="root", passwd="root")
 
 # ------------Database Implementation End----------------
 
