@@ -5,6 +5,8 @@ from tkinter import messagebox
 import pymysql
 import pymysql.cursors
 import datetime
+import os
+
 users_name = ""
 
 #Set your OpenAI API key
@@ -19,6 +21,8 @@ You will respond only to greetings and any questions pertaining to customer serv
 For any questions that do not fall within these parameters you will respond with "Unfortunately I cannot help with that 
 would you like to start a support ticket.".'''
 
+userid = ""
+filepath = ""
 # ------------App Functions----------------
 
 
