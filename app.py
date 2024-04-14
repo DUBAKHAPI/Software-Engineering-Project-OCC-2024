@@ -4,7 +4,11 @@ from tkinter import messagebox
 import pymysql
 import pymysql.cursors
 import datetime
+import os
+
 users_name = ""
+userid = ""
+filepath = ""
 # ------------App Functions----------------
 
 
@@ -76,8 +80,14 @@ def EndSession():
     chatAreaPage.pack_forget()  # Hide the chat area page
     supportTicketPage.pack_forget()  # Hide the support ticket page
     mainMenuPage.pack()  # Show the Main Menu
+    PassMessageLog()
 
-
+def delete_file(filepath):
+    file_path = filepath
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    else:
+        messagebox.showinfo("Jose Sucks", "Jose Fucked Something Up")
 # ------------App Functions end----------------
 
 
@@ -165,6 +175,8 @@ def Login():
         myCursor.execute(getUserQuery, (username_email, username_email, password))
         row = myCursor.fetchone()
         getUsersName(row[2])
+        getUserID(row[0])
+        print(row[0])
         con.close()
 
 
@@ -173,8 +185,35 @@ def getUsersName(firstname):
     users_name = firstname
 
 
+def getUserID(user_id):
+    global userid
+    userid = user_id
+
+
 def PassMessageLog():
-    print("hello")
+    global userid
+    global filepath
+    filepath = "messagelog.txt"
+    # Read the content of the messagelog.txt file
+    with open("messagelog.txt", "r") as log_file:
+        message_logs = log_file.read()
+
+    # Create a connection to the database
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="paulsucks01!",
+        database="chatterbot",
+    )
+    current_datetime = datetime.datetime.now()
+    # Create a cursor object to execute SQL queries
+    myCursor = con.cursor()
+    PassMessageLogQuery = 'INSERT INTO messagelogs (logDT, message_logs, user_id) ' \
+                          'VALUES (%s, %s, %s)'
+    myCursor.execute(PassMessageLogQuery, (current_datetime, message_logs, userid))
+    con.commit()
+    con.close()
+    delete_file(filepath)
 
 
 def PassUnknownTextLog():
@@ -182,7 +221,53 @@ def PassUnknownTextLog():
 
 
 def SubmitTicket():
-    print("hello")
+    global userid
+    global filepath
+    filepath = "supportticket.txt"
+    # Retrieve user inputs from the text boxes
+    issue = supportTicket_issue_text.get("1.0", tk.END).strip()
+    description = supportTicket_description_text.get("1.0", tk.END).strip()
+
+    if issue and description:
+        # Format the inputs
+        formatted_issue = f"issue: {issue}"
+        formatted_description = f"description: {description}"
+
+        # Write the formatted inputs to the support ticket file
+        with open("supportticket.txt", "a") as ticket_file:
+            ticket_file.write(formatted_issue + "\n")
+            ticket_file.write(formatted_description + "\n")
+
+        # Read the content of the file
+        with open("supportticket.txt", "r") as ticket_file:
+            ticket_content = ticket_file.read()
+
+        # Create a connection to the database
+        con = pymysql.connect(
+            host="localhost",
+            user="root",
+            password="paulsucks01!",
+            database="chatterbot",
+        )
+        current_datetime = datetime.datetime.now()
+        # Create a cursor object to execute SQL queries
+        myCursor = con.cursor()
+        PassSupportTicketQuery = 'INSERT INTO supporttickets (status, openDT, supportticket, user_id) ' \
+                                 'VALUES (%s, %s, %s, %s)'
+        myCursor.execute(PassSupportTicketQuery, ("open", current_datetime, ticket_content, userid))
+        con.commit()
+        con.close()
+        # Clear the text boxes after submitting the ticket
+        supportTicket_issue_text.delete("1.0", tk.END)
+        supportTicket_description_text.delete("1.0", tk.END)
+
+        # Show a messagebox indicating successful submission
+        messagebox.showinfo("Ticket Submitted", "Your ticket has been submitted successfully.")
+        delete_file(filepath)
+    else:
+        # Show a messagebox if any of the text boxes are empty
+        messagebox.showwarning("Empty Fields"
+                               , "Please fill in both the issue and description fields before submitting.")
 
 
 def VerifyLogIn():
@@ -459,7 +544,7 @@ supportTicket_main_menu_button.grid(row=2, column=2, pady=10, padx=10, sticky='e
 
 # Create "Submit Ticket" button
 supportTicket_submit_button = tk.Button(supportTicketPage, text="Submit Ticket",
-                                        font=("Helvetica", 12, "bold"), bd=2, relief=tk.RAISED)
+                                        font=("Helvetica", 12, "bold"), bd=2, relief=tk.RAISED, command=SubmitTicket)
 supportTicket_submit_button.grid(row=3, column=1, columnspan=2, pady=10, padx=10, sticky='ew')
 # ------------Support Ticket Page End----------------
 
