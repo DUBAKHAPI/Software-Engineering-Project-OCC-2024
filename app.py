@@ -7,7 +7,7 @@ import pymysql.cursors
 import datetime
 import os
 
-users_name = ""
+
 
 #Set your OpenAI API key
 openai.api_key = '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'
@@ -21,8 +21,10 @@ You will respond only to greetings and any questions pertaining to customer serv
 For any questions that do not fall within these parameters you will respond with "Unfortunately I cannot help with that 
 would you like to start a support ticket.".'''
 
+users_name = ""
 userid = ""
 filepath = ""
+counter = 0
 # ------------App Functions----------------
 
 
@@ -199,7 +201,6 @@ def Login():
         row = myCursor.fetchone()
         getUsersName(row[2])
         getUserID(row[0])
-        print(row[0])
         con.close()
 
 
@@ -311,6 +312,7 @@ def ResetPasswordEmail():
 
 
 def sendMessage():
+    global counter
     global users_name
     # Get the message from the typing area
     message = chatAreaPage_typing_area.get("1.0", tk.END).strip()
@@ -332,6 +334,7 @@ def sendMessage():
 
         # Clear the typing area after sending the message
         chatAreaPage_typing_area.delete("1.0", tk.END)
+        counter+=1
     else:
         # Show a messagebox if the user tries to send an empty message
         messagebox.showinfo("Empty Message", "Please enter a message before sending.")
