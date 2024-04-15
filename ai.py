@@ -14,32 +14,38 @@ connection = mysql.connector.connect(
 )
 
 # Create a cursor object
-cursor = connection.cursor()
+myCursor = connection.cursor()
 
-# Execute a SQL query
-cursor.execute("SELECT * FROM users")
+# Define the first query to fetch data from the users table
+query1 = "SELECT first_name, last_name, email, password FROM users"
 
-# Fetch all rows
-rows = cursor.fetchall()
+# Execute the first query
+myCursor.execute(query1)
 
-# Process the data as needed
-prompt = "Give me the first name and last name of everyone in users"
-for row in rows:
-    # Construct the prompt using data from the database
-    first_name = row[2]
-    last_name = row[3]
-    prompt += f"User: What is the first and last name of the person? First name: {first_name}, Last name: {last_name}\n"
+# Fetch all the results from the users table
+users_data = myCursor.fetchall()
 
-# Close cursor and connection
-cursor.close()
+# Define the second query to fetch data from the faqs table
+query2 = "SELECT faq_name, faq_url FROM faqs"
+
+# Execute the second query
+myCursor.execute(query2)
+
+# Fetch all the results from the faqs table
+faq_data = myCursor.fetchall()
+
+# Close the database connection
 connection.close()
+
+# Combine the data from both queries
+combined_data = users_data + faq_data
 
 # Generate response using OpenAI chat completion
 response = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": prompt}
+        {"role": "user", "content": f"prompt"}
     ]
 )
 

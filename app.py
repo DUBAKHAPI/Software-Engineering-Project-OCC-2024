@@ -308,7 +308,7 @@ def ResetPasswordEmail():
     print("hello")
 
 
-def sendMessage():
+def sendUserMessage():
     global counter
     global users_name
     # Get the message from the typing area
@@ -543,7 +543,7 @@ chatAreaPage_typing_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(10,
 
 # Create a send button
 chatAreaPage_send_button = tk.Button(chatAreaPage_typing_frame, text="Send", fg="black", font=("Helvetica", 12, "bold"),
-                                     bd=2, relief=tk.RAISED, command=sendMessage)
+                                     bd=2, relief=tk.RAISED, command=sendUserMessage)
 chatAreaPage_send_button.pack(side=tk.RIGHT, padx=(0, 10), pady=(10, 0))
 
 # Create a frame for buttons
