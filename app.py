@@ -169,7 +169,7 @@ def Login():
     con = pymysql.connect(
         host="localhost",
         user="root",
-        password="Shabeg12#",
+        password="paulsucks01!",
         database="chatterbot",
     )
     # Create a cursor object to execute SQL queries
@@ -226,7 +226,7 @@ def PassMessageLog():
     con = pymysql.connect(
         host="localhost",
         user="root",
-        password="Shabeg12#",
+        password="paulsucks01!",
         database="Chatterbot"
     )
     current_datetime = datetime.datetime.now()
@@ -270,7 +270,7 @@ def SubmitTicket():
         con = pymysql.connect(
             host="localhost",
             user="root",
-            password="Shabeg12#",
+            password="paulsucks01!",
             database="chatterbot",
         )
 
@@ -363,7 +363,17 @@ def ask_openai(prompt):
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{
+                "role": "system",
+                "content": '''You are a customer service chat bot that is know as HelpBot.
+You will respond only to greetings and any questions pertaining to customer services the system offers. 
+For any questions that do not fall within these parameters you will respond with "Unfortunately I cannot help with that 
+would you like to start a support ticket.".'''
+            },
+            {
+                "role": "user",
+                "content": f"{prompt}"
+            }]
         )
         return response['choices'][0]['message']['content']
     except Exception as e:

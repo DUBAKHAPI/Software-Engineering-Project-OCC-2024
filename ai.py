@@ -17,17 +17,17 @@ connection = mysql.connector.connect(
 cursor = connection.cursor()
 
 # Execute a SQL query
-cursor.execute("SELECT first_name, last_name FROM users")
+cursor.execute("SELECT * FROM users")
 
 # Fetch all rows
 rows = cursor.fetchall()
 
 # Process the data as needed
-prompt = "Give me the name of each person in users"
+prompt = "Give me the first name and last name of everyone in users"
 for row in rows:
     # Construct the prompt using data from the database
-    first_name = row[0]
-    last_name = row[1]
+    first_name = row[2]
+    last_name = row[3]
     prompt += f"User: What is the first and last name of the person? First name: {first_name}, Last name: {last_name}\n"
 
 # Close cursor and connection
