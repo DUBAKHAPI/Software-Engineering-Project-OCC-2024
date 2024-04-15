@@ -142,9 +142,6 @@ def signup():
     if row != None:
         # If the email already exists, show a messagebox indicating duplicate email
         messagebox.showinfo("Duplicate", "Duplicate Email")
-    elif firstname == "" or lastname == "" or email == "" or password == "":
-        # If the email already exists, show a messagebox indicating duplicate email
-        messagebox.showinfo("Empty Field", "One of the fields has been left empty, please try again.")
     else:
         # If the email is unique, insert the user data into the database
         messagebox.showinfo("Sign Up Successful", "Sign Up was succesful")
@@ -332,48 +329,28 @@ def sendMessage():
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             log_file.write(f"{timestamp}: {formatted_message}\n")
 
+        # Get AI response
+        ai_response = ask_openai(message)
+        response_message = f"HelpBot: {ai_response}"
+        chatAreaPage_chat_area.insert(tk.END, response_message + "\n")
+
         # Clear the typing area after sending the message
         chatAreaPage_typing_area.delete("1.0", tk.END)
         counter+=1
     else:
         # Show a messagebox if the user tries to send an empty message
         messagebox.showinfo("Empty Message", "Please enter a message before sending.")
+
+        #clear tpying area after
 # ------------Database Functions End----------------
 
 
 # ------------AI Functions----------------
-
-def sendMessage():
-    global users_name
-    message = chatAreaPage_typing_area.get("1.0", tk.END).strip()
-
-    if message:
-        formatted_message = f"{users_name}: {message}"
-        chatAreaPage_chat_area.insert(tk.END, formatted_message + "\n")
-        chatAreaPage_chat_area.see(tk.END)
-        chatAreaPage_typing_area.delete("1.0", tk.END)
-
-        ai_response = ask_openai(message)
-        if ai_response:
-            response_message = f"HelpBot: {ai_response}"
-            chatAreaPage_chat_area.insert(tk.END, response_message + "\n")
-            chatAreaPage_chat_area.see(tk.END)
-
 def ask_openai(prompt):
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[{
-                "role": "system",
-                "content": '''You are a customer service chat bot that is know as HelpBot.
-You will respond only to greetings and any questions pertaining to customer services the system offers. 
-For any questions that do not fall within these parameters you will respond with "Unfortunately I cannot help with that 
-would you like to start a support ticket.".'''
-            },
-            {
-                "role": "user",
-                "content": f"{prompt}"
-            }]
+            messages=[{"role": "user", "content": prompt}]
         )
         return response['choices'][0]['message']['content']
     except Exception as e:
