@@ -340,7 +340,7 @@ def sendMessage():
 
 # ------------AI Functions----------------
 
-def userMessage():
+def sendMessage():
     global users_name
     message = chatAreaPage_typing_area.get("1.0", tk.END).strip()
 
@@ -356,19 +356,16 @@ def userMessage():
             chatAreaPage_chat_area.insert(tk.END, response_message + "\n")
             chatAreaPage_chat_area.see(tk.END)
 
-def ask_openai(user_input):
-    """ Send user input to OpenAI and return the AI's response """
+def ask_openai(prompt):
     try:
-        response = openai.Completion.create(
-          engine="gpt-3.5-turbo",
-          prompt=user_input,
-          max_tokens=150
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}]
         )
-        return response.choices[0].text.strip()
+        return response['choices'][0]['message']['content']
     except Exception as e:
-        print(f"Error: {e}")
-        return "Sorry, I am unable to process your request right now."
-
+        print(f"Error communicating with OpenAI: {str(e)}")
+        return f"Sorry, I am unable to process your request right now due to: {str(e)}"
 # ------------AI Functions End----------------
 
 
