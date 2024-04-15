@@ -341,7 +341,7 @@ def sendMessage():
         # Show a messagebox if the user tries to send an empty message
         messagebox.showinfo("Empty Message", "Please enter a message before sending.")
 
-        #clear tpying area after
+
 # ------------Database Functions End----------------
 
 
@@ -350,7 +350,17 @@ def ask_openai(prompt):
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{
+                "role": "system",
+                "content": '''You are a customer service chat bot that is know as HelpBot.
+You will respond only to greetings and any questions pertaining to customer services the system offers. 
+For any questions that do not fall within these parameters you will respond with "Unfortunately I cannot help with that 
+would you like to start a support ticket.".'''
+            },
+            {
+                "role": "user",
+                "content": f"{prompt}"
+            }]
         )
         return response['choices'][0]['message']['content']
     except Exception as e:
