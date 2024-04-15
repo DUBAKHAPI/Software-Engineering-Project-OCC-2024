@@ -117,7 +117,7 @@ def signup():
     con = pymysql.connect(
         host="localhost",
         user="root",
-        password="paulsucks01!",
+        password="Shabeg12#",
         database="chatterbot",
     )
     # Create a cursor object to execute SQL queries
@@ -164,7 +164,7 @@ def Login():
     con = pymysql.connect(
         host="localhost",
         user="root",
-        password="paulsucks01!",
+        password="Shabeg12#",
         database="chatterbot",
     )
     # Create a cursor object to execute SQL queries
@@ -222,8 +222,8 @@ def PassMessageLog():
     con = pymysql.connect(
         host="localhost",
         user="root",
-        password="paulsucks01!",
-        database="chatterbot",
+        password="Shabeg12#",
+        database="Chatterbot"
     )
     current_datetime = datetime.datetime.now()
     # Create a cursor object to execute SQL queries
@@ -266,9 +266,10 @@ def SubmitTicket():
         con = pymysql.connect(
             host="localhost",
             user="root",
-            password="paulsucks01!",
+            password="Shabeg12#",
             database="chatterbot",
         )
+
         current_datetime = datetime.datetime.now()
         # Create a cursor object to execute SQL queries
         myCursor = con.cursor()
@@ -336,6 +337,34 @@ def sendMessage():
 
 # ------------AI Functions----------------
 
+def userMessage():
+    global users_name
+    message = chatAreaPage_typing_area.get("1.0", tk.END).strip()
+
+    if message:
+        formatted_message = f"{users_name}: {message}"
+        chatAreaPage_chat_area.insert(tk.END, formatted_message + "\n")
+        chatAreaPage_chat_area.see(tk.END)
+        chatAreaPage_typing_area.delete("1.0", tk.END)
+
+        ai_response = ask_openai(message)
+        if ai_response:
+            response_message = f"HelpBot: {ai_response}"
+            chatAreaPage_chat_area.insert(tk.END, response_message + "\n")
+            chatAreaPage_chat_area.see(tk.END)
+
+def ask_openai(user_input):
+    """ Send user input to OpenAI and return the AI's response """
+    try:
+        response = openai.Completion.create(
+          engine="gpt-3.5-turbo",
+          prompt=user_input,
+          max_tokens=150
+        )
+        return response.choices[0].text.strip()
+    except Exception as e:
+        print(f"Error: {e}")
+        return "Sorry, I am unable to process your request right now."
 
 # ------------AI Functions End----------------
 
