@@ -117,7 +117,7 @@ def signup():
     con = pymysql.connect(
         host="localhost",
         user="root",
-        password="Shabeg12#",
+        password="paulsucks01!",
         database="chatterbot",
     )
     # Create a cursor object to execute SQL queries
@@ -140,6 +140,9 @@ def signup():
     if row != None:
         # If the email already exists, show a messagebox indicating duplicate email
         messagebox.showinfo("Duplicate", "Duplicate Email")
+    elif firstname == "" or lastname == "" or email == "" or password == "":
+        # If the email already exists, show a messagebox indicating duplicate email
+        messagebox.showinfo("Empty Field", "One of the fields has been left empty, please try again.")
     else:
         # If the email is unique, insert the user data into the database
         messagebox.showinfo("Sign Up Successful", "Sign Up was succesful")

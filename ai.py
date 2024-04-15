@@ -9,7 +9,7 @@ openai.organization = 'org-oGBGu9sxvYSvEpA9gj8iNCXA'
 connection = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="Shabeg12#",
+    password="paulsucks01!",
     database="Chatterbot"
 )
 
