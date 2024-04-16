@@ -1,13 +1,10 @@
 import tkinter as tk
-from tkinter import *
 import openai
 from tkinter import messagebox
 import pymysql
 import pymysql.cursors
 import datetime
 import os
-
-
 
 #Set your OpenAI API key
 openai.api_key = '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'
@@ -59,18 +56,62 @@ def toResetPassword():
 
 
 def ResetPassword():
-    # Display an information message indicating that an email has been sent
-    messagebox.showinfo("Email Sent", "An Email has been to your email with instructions on how to proceed")
+    # Get the entry from the reset password textbox
+    reset_entry = resetPage_username_entry.get()  # Assuming resetPage_username_entry is the name of your textbox
 
-    # Hide the reset button and show the main menu button
-    resetPage_reset_button.grid_forget()
-    resetPage_mainMenu_button.grid(row=5, column=0, columnspan=2, pady=10)
+    # Connect to the database
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="paulsucks01!",
+        database="chatterbot",
+    )
+    # Create a cursor object to execute SQL queries
+    myCursor = con.cursor()
 
-    # Show the main menu page and hide the reset password page
-    mainMenuPage.pack()
-    resetPasswordPage.pack_forget()
+    try:
+        # Search for a username or email that matches the reset entry
+        myCursor.execute("SELECT userid, username, email FROM users WHERE username = %s OR email = %s",
+                         (reset_entry, reset_entry))
+        user = myCursor.fetchone()
+        if user:
+            usersid, username, email = user
+            # Create a password support ticket file
+            with open("passwordsupportticket.txt", "a") as ticket_file:
+                ticket_file.write(
+                    f"Issue: Change Password\nDescription: I need to change my account's password.\nAccount details: "
+                    f"userid = {usersid}\n")
 
-    resetPage_username_entry.delete(0, tk.END)  # Clear the username entry field
+            with open(f"passwordsupportticket_{usersid}.txt", "r") as ticket_file:
+                ticket_content = ticket_file.read()
+
+                # Insert ticket information into the database
+                PassResetPasswordTicketQuery = 'INSERT INTO supporttickets (status, openDT, supportticket, user_id) ' \
+                                               'VALUES (%s, %s, %s, %s)'
+                current_datetime = datetime.datetime.now()
+                myCursor.execute(PassResetPasswordTicketQuery, ("open", current_datetime, ticket_content, usersid))
+                con.commit()  # Commit the transaction
+
+                # Return some message indicating success
+                messagebox.showinfo("Success", f"Password support ticket created for {username} ({email}).")
+                # Call delete_file with the file path
+                delete_file("passwordsupportticket.txt")
+                resetPage_reset_button.grid_forget()
+                resetPage_mainMenu_button.grid(row=5, column=0, columnspan=2, pady=10)
+
+                # Show the main menu page and hide the reset password page
+                mainMenuPage.pack()
+                resetPasswordPage.pack_forget()
+
+                resetPage_username_entry.delete(0, tk.END)  # Clear the username entry field
+                con.close()
+        else:
+            # If no matching user found, return an error message
+            messagebox.showinfo("Error", "No user found with the provided username or email.")
+    except Exception as e:
+        # Print any exception that occurs
+        print("An error occurred:", e)
+        messagebox.showinfo("Error", "An error occurred while processing your request. Please try again later.")
 
 
 def toMainMenu():
@@ -104,12 +145,12 @@ def EndSession():
     mainMenuPage.pack()  # Show the Main Menu
     PassMessageLog()
 
+
 def delete_file(filepath):
     file_path = filepath
     if os.path.exists(file_path):
         os.remove(file_path)
-    else:
-        messagebox.showinfo("Jose Sucks", "Jose Fucked Something Up")
+
 # ------------App Functions end----------------
 
 
@@ -292,51 +333,42 @@ def SubmitTicket():
                                , "Please fill in both the issue and description fields before submitting.")
 
 
-def VerifyLogIn():
-    print("hello")
+def handle_user_input(message):
+    global counter
+    global users_name
 
+    # Format the message as "user: message"
+    formatted_message = f"{users_name}: {message}"
 
-def GetFaqURl():
-    print("hello")
+    # Append the formatted message to the message display portion
+    chatAreaPage_chat_area.insert(tk.END, formatted_message + "\n")
 
+    # Scroll to the end of the chat area to show the latest message
+    chatAreaPage_chat_area.see(tk.END)
 
-def AddUser():
-    print("hello")
+    # Write the formatted message along with the current date and time to the message log file
+    with open("messagelog.txt", "a") as log_file:
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_file.write(f"{timestamp}: {formatted_message}\n")
 
+    # Get AI response
+    ai_response = ask_openai(message)
+    response_message = f"HelpBot: {ai_response}"
+    chatAreaPage_chat_area.insert(tk.END, response_message + "\n")
 
-def ResetPasswordEmail():
-    print("hello")
+    # Clear the typing area after sending the message
+    chatAreaPage_typing_area.delete("1.0", tk.END)
+    counter += 1
+
+# Now, let's modify the sendUserMessage function to use this handle_user_input function:
 
 
 def sendUserMessage():
-    global counter
-    global users_name
     # Get the message from the typing area
     message = chatAreaPage_typing_area.get("1.0", tk.END).strip()
 
     if message:
-        # Format the message as "user: message"
-        formatted_message = f"{users_name}: {message}"
-
-        # Append the formatted message to the message display portion
-        chatAreaPage_chat_area.insert(tk.END, formatted_message + "\n")
-
-        # Scroll to the end of the chat area to show the latest message
-        chatAreaPage_chat_area.see(tk.END)
-
-        # Write the formatted message along with the current date and time to the message log file
-        with open("messagelog.txt", "a") as log_file:
-            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            log_file.write(f"{timestamp}: {formatted_message}\n")
-
-        # Get AI response
-        ai_response = ask_openai(message)
-        response_message = f"HelpBot: {ai_response}"
-        chatAreaPage_chat_area.insert(tk.END, response_message + "\n")
-
-        # Clear the typing area after sending the message
-        chatAreaPage_typing_area.delete("1.0", tk.END)
-        counter+=1
+        handle_user_input(message)
     else:
         # Show a messagebox if the user tries to send an empty message
         messagebox.showinfo("Empty Message", "Please enter a message before sending.")
@@ -348,25 +380,230 @@ def sendUserMessage():
 # ------------AI Functions----------------
 def ask_openai(prompt):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{
-                "role": "system",
-                "content": '''You are a customer service chat bot that is know as HelpBot.
-You will respond only to greetings and any questions pertaining to customer services the system offers. 
-For any questions that do not fall within these parameters you will respond with "Unfortunately I cannot help with that 
-would you like to start a support ticket.".'''
-            },
-            {
-                "role": "user",
-                "content": f"{prompt}"
-            }]
-        )
-        return response['choices'][0]['message']['content']
+        if "change my first name" in prompt.lower():
+            # Extract the new first name from the user's message
+            new_first_name = prompt.split("change my first name")[1].strip()
+
+            # Call the function to update the first name in the database
+            update_first_name(new_first_name)
+
+            # Return a response indicating that the first name has been updated
+            return f"Your first name has been updated to {new_first_name}."
+        elif "change my last name" in prompt.lower():
+            # Extract the new last name from the user's message
+            new_last_name = prompt.split("change my last name")[1].strip()
+
+            # Call the function to update the last name in the database
+            update_last_name(new_last_name)
+
+            # Return a response indicating that the last name has been updated
+            return f"Your last name has been updated to {new_last_name}."
+        elif "change my username" in prompt.lower():
+            # Extract the new username from the user's message
+            new_username = prompt.split("change my username")[1].strip()
+
+            # Call the function to update the username in the database
+            update_username(new_username)
+
+            # Return a response indicating that the username has been updated
+            return f"Your username has been updated to {new_username}."
+        elif "change my email" in prompt.lower():
+            # Extract the new email from the user's message
+            new_email = prompt.split("change my email")[1].strip()
+
+            # Call the function to update the email in the database
+            update_email(new_email)
+
+            # Return a response indicating that the email has been updated
+            return f"Your email has been updated to {new_email}."
+        elif "information on account" in prompt.lower():
+            url = getAccountURl()
+            return f"Here is the information on account: {url}"
+        elif "tracking" in prompt.lower():
+            url = getTrackingURl()
+            return f"Here is the tracking information: {url}"
+        elif "return policy" in prompt.lower():
+            url = getReturnURl()
+            return f"Here is the return policy: {url}"
+        elif "privacy and security" in prompt.lower():
+            url = getPrivandSecURl()
+            return f"Here is the privacy and security information: {url}"
+        else:
+            # If the message doesn't match any specific action, use OpenAI to generate a response
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[{
+                    "role": "system",
+                    "content": system_content
+                },
+                    {
+                        "role": "user",
+                        "content": f"{prompt}"
+                    }]
+            )
+            return response['choices'][0]['message']['content']
     except Exception as e:
         print(f"Error communicating with OpenAI: {str(e)}")
         return f"Sorry, I am unable to process your request right now due to: {str(e)}"
+
 # ------------AI Functions End----------------
+
+
+# ------------AI Database Functions ----------------
+def update_first_name(new_first_name):
+    global userid
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="paulsucks01!",
+        database="chatterbot",
+    )
+
+    # Create a cursor object to execute SQL queries
+    myCursor = con.cursor()
+    ChangeFirstNameQuery = 'UPDATE users SET first_name = %s WHERE userid = %s;)'
+    myCursor.execute(ChangeFirstNameQuery, (new_first_name, userid))
+    con.commit()
+    con.close()
+
+
+def update_last_name(new_last_name):
+    global userid
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="paulsucks01!",
+        database="chatterbot",
+    )
+
+    # Create a cursor object to execute SQL queries
+    myCursor = con.cursor()
+    ChangeLastNameQuery = 'UPDATE users SET last_name = %s WHERE userid = %s;)'
+    myCursor.execute(ChangeLastNameQuery, (new_last_name, userid))
+    con.commit()
+    con.close()
+
+
+def update_email(new_email):
+    global userid
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="paulsucks01!",
+        database="chatterbot",
+    )
+
+    # Create a cursor object to execute SQL queries
+    myCursor = con.cursor()
+    ChangeEmailQuery = 'UPDATE users SET email = %s WHERE userid = %s;)'
+    myCursor.execute(ChangeEmailQuery, (new_email, userid))
+    con.commit()
+    con.close()
+
+
+def update_password(new_password):
+    global userid
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="paulsucks01!",
+        database="chatterbot",
+    )
+
+    # Create a cursor object to execute SQL queries
+    myCursor = con.cursor()
+    ChangePasswordQuery = 'UPDATE users SET password = %s WHERE userid = %s;)'
+    myCursor.execute(ChangePasswordQuery, (new_password, userid))
+    con.commit()
+    con.close()
+
+
+def update_username(new_username):
+    global userid
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="paulsucks01!",
+        database="chatterbot",
+    )
+
+    # Create a cursor object to execute SQL queries
+    myCursor = con.cursor()
+    ChangeUsernameQuery = 'UPDATE users SET username = %s WHERE userid = %s'
+    myCursor.execute(ChangeUsernameQuery, (new_username, userid))
+    con.commit()
+    con.close()
+
+
+def getAccountURl():
+    global userid
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="paulsucks01!",
+        database="chatterbot",
+    )
+    myCursor = con.cursor()
+    getAccountURlQuery = 'select * from faqs where faq_id = 1'
+    myCursor.execute(getAccountURlQuery)
+    row = myCursor.fetchone()
+    con.commit()
+    con.close()
+    return row[2]
+
+
+def getTrackingURl():
+    global userid
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="paulsucks01!",
+        database="chatterbot",
+        )
+    myCursor = con.cursor()
+    getTrackingURlQuery = 'select * from faqs where faq_id = 2'
+    myCursor.execute(getTrackingURlQuery, )
+    row = myCursor.fetchone()
+    con.commit()
+    con.close()
+    return row[2]
+
+
+def getReturnURl():
+    global userid
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="paulsucks01!",
+        database="chatterbot",
+    )
+    myCursor = con.cursor()
+    getReturnURlQuery = 'select * from faqs where faq_id = 3'
+    myCursor.execute(getReturnURlQuery, )
+    row = myCursor.fetchone()
+    con.commit()
+    con.close()
+    return row[2]
+
+
+def getPrivandSecURl():
+    global userid
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="paulsucks01!",
+        database="chatterbot",
+    )
+    myCursor = con.cursor()
+    PrivandSecURlQuery = 'select * from faqs where faq_id = 4'
+    myCursor.execute(PrivandSecURlQuery, )
+    row = myCursor.fetchone()
+    con.commit()
+    con.close()
+    return row[2]
+
+
+# ------------AI Database Functions End ----------------
 
 
 # ------------Creates Initial Window and Frames----------------
@@ -437,7 +674,7 @@ loginPage_reset_button.grid(row=5, column=0, columnspan=2, pady=10)
 
 loginPage_menu_button = tk.Button(loginPage, text="Main Menu", font=("Helvetica", 16, "bold"), command=toMainMenu)
 loginPage_menu_button.grid(row=6, column=0, columnspan=2, pady=10)
-# ------------Login Page End----------------
+# ------------Login Page End----------------0
 
 
 # ------------Sign Up Page----------------
